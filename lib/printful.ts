@@ -56,6 +56,26 @@ export async function fetchProducts() {
 
 export async function fetchProductDetails(id: string) {
   const data = await fetchFromPrintful(`/store/products/${id}`);
+
+  // If using mock data
+  if (!process.env.PRINTFUL_API_KEY) {
+    const mockProduct = data.result;
+    return {
+      id: mockProduct.id,
+      name: mockProduct.name,
+      thumbnail_url: mockProduct.thumbnail_url,
+      variants: mockProduct.variants.map((variant: any) => ({
+        id: variant.id,
+        name: variant.name,
+        retail_price: variant.retail_price,
+        size: variant.size,
+        color: variant.color,
+        preview_url: variant.files?.[0]?.preview_url,
+      })),
+    };
+  }
+
+  // If using real Printful API
   const product = data.result.sync_product;
   const variants = data.result.sync_variants;
   return {
